@@ -5,6 +5,7 @@ const createUser = async (req, res) => {
   try {
     const { userId, email, displayName } = req.body;
     const user = await User(userId, email, displayName);
+
     res.json({
       status: 201,
       success: true,
@@ -22,15 +23,32 @@ const createUser = async (req, res) => {
 
 const userLogin = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { userId, email, displayName } = req.body;
     console.log(email);
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(401).json({
-        status: 401,
-        success: false,
-        message: "User not found",
+      const newUser = await User({ userId, email, displayName });
+      await newUser.save();
+
+      const payload = {
+        userId: newUser._id,
+        email: newUser.email,
+        displayName: newUser.displayName,
+      };
+
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: "1d",
+      });
+
+      return res.json({
+        status: 201,
+        success: true,
+        message: "User created successfully",
+        data: {
+          token,
+          newUser,
+        },
       });
     }
 
@@ -44,7 +62,7 @@ const userLogin = async (req, res) => {
       expiresIn: "1d",
     });
 
-    res.json({
+    return res.json({
       status: 200,
       success: true,
       message: "User logged in successfully",
@@ -54,7 +72,8 @@ const userLogin = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({
+    console.log(err);
+    return res.status(500).json({
       status: 500,
       success: false,
       message: "Internal Server Error",

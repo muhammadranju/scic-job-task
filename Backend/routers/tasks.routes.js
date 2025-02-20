@@ -8,8 +8,8 @@ const {
 const authMiddleware = require("../middleware/authMiddleware");
 
 router.get("/", getTasks);
-router.post("/", authMiddleware, createTask);
-router.put("/:id", authMiddleware, updateTask);
-router.delete("/:id", authMiddleware, deleteTask);
+router.post("/", createTask);
+router.put("/:id", updateTask);
+router.delete("/:id", deleteTask);
 
 module.exports = router;
