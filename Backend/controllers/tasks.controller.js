@@ -2,12 +2,12 @@ const Task = require("../models/tasks.model");
 
 const createTask = async (req, res) => {
   try {
-    const { title, description, category } = req.body;
+    const { title, description, status } = req.body;
 
     const task = await Task({
       title,
       description,
-      category,
+      status,
       userId: req.user.userId,
     });
 
@@ -17,8 +17,11 @@ const createTask = async (req, res) => {
       status: 201,
       success: true,
       message: "Task created successfully",
+      task,
     });
   } catch (err) {
+    console.log(err);
+
     res.status(500).json({
       status: 500,
       success: false,
@@ -29,20 +32,28 @@ const createTask = async (req, res) => {
 
 const getTasks = async (req, res) => {
   try {
-    const tasks = await Task.find({
-      userId: req.user.userId,
-    });
-    res.json({
+    const tasks = await Task.find(); // Fetch all tasks
+
+    // Categorize tasks into "To-Do", "In Progress", and "Done"
+    const categorizedTasks = {
+      TODO: tasks.filter((task) => task.status === "TODO"),
+      IN_PROGRESS: tasks.filter((task) => task.status === "IN_PROGRESS"),
+      Done: tasks.filter((task) => task.status === "DONE"),
+    };
+
+    res.status(200).json({
       status: 200,
       success: true,
       message: "Tasks retrieved successfully",
       data: tasks,
     });
-  } catch (err) {
+  } catch (error) {
+    console.error("Error fetching tasks:", error.message);
     res.status(500).json({
       status: 500,
       success: false,
       message: "Internal Server Error",
+      error: error.message,
     });
   }
 };

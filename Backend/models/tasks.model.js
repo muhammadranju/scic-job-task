@@ -11,10 +11,10 @@ const taskSchema = new Schema(
       type: String,
       maxlength: 200,
     },
-    category: {
+    status: {
       type: String,
-      enum: ["To-Do", "In Progress", "Done"],
-      default: "To-Do",
+      enum: ["TODO", "IN_PROGRESS", "DONE"],
+      default: "TODO",
     },
     userId: {
       type: Schema.Types.ObjectId,
