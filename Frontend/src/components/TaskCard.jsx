@@ -1,11 +1,12 @@
 /* eslint-disable react/prop-types */
 
 import { useDraggable } from "@dnd-kit/core";
+import { Reorder } from "framer-motion";
 
 import { useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 
-function TaskCard({ task, onDeleteTask, onEditTask }) {
+function TaskCard({ task, onDeleteTask, onEditTask, setTasks }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: task._id,
   });
@@ -23,7 +24,6 @@ function TaskCard({ task, onDeleteTask, onEditTask }) {
     : undefined;
 
   const handleDelete = () => {
-    setIsModalOpen(true);
     onDeleteTask(task._id);
   };
 
@@ -38,40 +38,44 @@ function TaskCard({ task, onDeleteTask, onEditTask }) {
 
   return (
     <>
-      <div
-        ref={setNodeRef}
-        {...listeners}
-        {...attributes}
-        onMouseEnter={() => setMouseIsOver(true)}
-        onMouseLeave={() => setMouseIsOver(false)}
-        className={`cursor-grab rounded-lg p-4 shadow-sm bg-gray-700 hover:shadow-md transition-transform flex justify-between items-center ${
-          (task.status === "DONE" && "bg-green-600/50") ||
-          (task.status === "IN_PROGRESS" && "bg-yellow-600/50")
-        }`}
-        style={style}
-      >
-        <div>
-          <h3 className="font-medium text-neutral-100">{task.title}</h3>
-          <p
-            className={`mt-2 text-sm ${
-              (task.status === "DONE" && "text-green-200") ||
-              (task.status === "IN_PROGRESS" && "text-yellow-200")
+      <Reorder.Group values={task} onReorder={setTasks}>
+        <Reorder.Item value={task} key={task._id}>
+          <div
+            ref={setNodeRef}
+            {...listeners}
+            {...attributes}
+            onMouseEnter={() => setMouseIsOver(true)}
+            onMouseLeave={() => setMouseIsOver(false)}
+            className={`cursor-grab rounded-lg p-4 shadow-sm bg-gray-700 hover:shadow-md transition-transform flex justify-between items-center ${
+              (task.status === "DONE" && "bg-green-600/50") ||
+              (task.status === "IN_PROGRESS" && "bg-yellow-600/50")
             }`}
+            style={style}
           >
-            {task.description}
-          </p>
-        </div>
-        {mouseIsOver && (
-          <div className="flex gap-2">
-            <button onClick={handleEdit} className="text-green-400 p-2">
-              <FaEdit className="text-2xl" />
-            </button>
-            <button onClick={handleDelete} className="text-red-400 p-2">
-              <FaTrash className="text-xl" />
-            </button>
+            <div>
+              <h3 className="font-medium text-neutral-100">{task.title}</h3>
+              <p
+                className={`mt-2 text-sm ${
+                  (task.status === "DONE" && "text-green-200") ||
+                  (task.status === "IN_PROGRESS" && "text-yellow-200")
+                }`}
+              >
+                {task.description}
+              </p>
+            </div>
+            {mouseIsOver && (
+              <div className="flex gap-2">
+                <button onClick={handleEdit} className="text-green-400 p-2">
+                  <FaEdit className="text-2xl" />
+                </button>
+                <button onClick={handleDelete} className="text-red-400 p-2">
+                  <FaTrash className="text-xl" />
+                </button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </Reorder.Item>
+      </Reorder.Group>
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">

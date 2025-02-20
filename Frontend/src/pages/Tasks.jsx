@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import Column from "../components/Column";
 import { AuthContext } from "../context/AuthProvider";
+import Swal from "sweetalert2";
 
 const socket = io("http://localhost:5000");
 
@@ -30,7 +31,7 @@ export default function Tasks() {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    navigate("/login");
+    navigate("/login", { replace: true });
   }
 
   useEffect(() => {
@@ -113,14 +114,33 @@ export default function Tasks() {
 
   const onDeleteTask = async (taskId) => {
     try {
-      await fetch(`http://localhost:5000/tasks/${taskId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          await fetch(`http://localhost:5000/tasks/${taskId}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          setTasks((prevTasks) =>
+            prevTasks.filter((task) => task._id !== taskId)
+          );
+          socket.emit("deleteTask", taskId);
+          Swal.fire({
+            title: "Deleted!",
+            text: "Your file has been deleted.",
+            icon: "success",
+          });
+        }
       });
-      setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
-      socket.emit("deleteTask", taskId);
     } catch (error) {
       console.error("Error deleting task:", error);
     }
@@ -180,6 +200,8 @@ export default function Tasks() {
               tasks={tasks.filter((task) => task.status === column._id)}
               onDeleteTask={onDeleteTask}
               onEditTask={onEditTask}
+              setTasks={setTasks}
+              onDragEnd={handleDragEnd}
             />
           ))}
         </DndContext>

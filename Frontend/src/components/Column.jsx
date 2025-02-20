@@ -6,7 +6,7 @@ import {
 } from "@dnd-kit/sortable";
 import TaskCard from "./TaskCard";
 
-function Column({ column, tasks, onDeleteTask, onEditTask }) {
+function Column({ column, tasks, setTasks, onDeleteTask, onEditTask }) {
   const { setNodeRef } = useDroppable({ id: column._id });
 
   return (
@@ -21,6 +21,7 @@ function Column({ column, tasks, onDeleteTask, onEditTask }) {
                 task={task}
                 onDeleteTask={onDeleteTask}
                 onEditTask={onEditTask}
+                setTasks={setTasks}
               />
             ))
           ) : (
