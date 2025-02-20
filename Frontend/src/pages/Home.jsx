@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
-import { io } from "socket.io-client";
+// import { io } from "socket.io-client";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -12,7 +12,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
 
 // Connect to WebSocket server
-const socket = io(import.meta.env.VITE_BackendURL); // Change this URL to your backend
+// const socket = io(import.meta.env.VITE_BackendURL); // Change this URL to your backend
 
 const COLUMNS = [
   { id: "TODO", title: "To Do" },
@@ -139,7 +139,7 @@ const Home = () => {
     }
 
     setTasks(updatedTasks);
-    socket.emit("updateTasks", updatedTasks); // Emit changes to the backend
+    // socket.emit("updateTasks", updatedTasks); // Emit changes to the backend
   };
 
   const addTask = () => {
@@ -155,7 +155,7 @@ const Home = () => {
     updatedTasks[newTask.category].push(newTaskData);
 
     setTasks(updatedTasks);
-    socket.emit("updateTasks", updatedTasks); // Emit new task to backend
+    // socket.emit("updateTasks", updatedTasks); // Emit new task to backend
 
     setNewTask({ title: "", description: "", category: "To-Do" });
     setIsModalOpen(false);
@@ -175,7 +175,7 @@ const Home = () => {
     );
 
     setTasks(updatedTasks);
-    socket.emit("updateTasks", updatedTasks); // Emit changes to the backend
+    // socket.emit("updateTasks", updatedTasks); // Emit changes to the backend
   };
   // console.log(newTas,.k);
   return (

@@ -1,9 +1,9 @@
 require("dotenv").config();
-const { Server } = require("socket.io");
+// const { Server } = require("socket.io");
 const http = require("http");
 const connectDB = require("./db/database");
 const app = require("./app");
-const updatedTasksStatus = require("./utils/updateStatus.socket");
+// const updatedTasksStatus = require("./utils/updateStatus.socket");
 
 connectDB();
 
@@ -18,6 +18,6 @@ const server = http.createServer(app);
 //   updatedTasksStatus(socket, io);
 // });
 
-server.listen(5000, () =>
+server.listen(4040, () =>
   console.log("Server running on port http://localhost:5000")
 );

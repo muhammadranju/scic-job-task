@@ -4,7 +4,10 @@ const morgan = require("morgan");
 const middleware = [
   express.json(),
   express.urlencoded({ extended: true }),
-  cors(),
+  cors({
+    origin: "*",
+    credentials: true,
+  }),
   morgan("dev"),
 ];
 

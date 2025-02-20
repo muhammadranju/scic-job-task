@@ -3,12 +3,12 @@ import { useContext, useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { RiLogoutCircleRLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
-import { io } from "socket.io-client";
+// import { io } from "socket.io-client";
 import Column from "../components/Column";
 import { AuthContext } from "../context/AuthProvider";
 import Swal from "sweetalert2";
 
-const socket = io(import.meta.env.VITE_BackendURL);
+// const socket = io(import.meta.env.VITE_BackendURL);
 
 const COLUMNS = [
   { _id: "TODO", title: "To Do" },
