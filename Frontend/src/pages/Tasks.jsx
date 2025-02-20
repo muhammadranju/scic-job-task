@@ -1,14 +1,13 @@
-import { DndContext } from "@dnd-kit/core";
+import { closestCenter, DndContext } from "@dnd-kit/core";
 import { useContext, useEffect, useState } from "react";
+import { FaPlus } from "react-icons/fa";
+import { RiLogoutCircleRLine } from "react-icons/ri";
+import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import Column from "../components/Column";
-import { FaPlus } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthProvider";
-import { RiLogoutCircleRLine } from "react-icons/ri";
 
-// Connect to WebSocket server
-const socket = io("http://localhost:5000"); // Adjust URL as needed
+const socket = io("http://localhost:5000");
 
 const COLUMNS = [
   { _id: "TODO", title: "To Do" },
@@ -53,7 +52,6 @@ export default function Tasks() {
 
     getTasks();
 
-    // Listen for real-time updates
     socket.on("tasksUpdated", (updatedTasks) => {
       console.log("Received updated tasks:", updatedTasks);
       setTasks(updatedTasks);
@@ -81,28 +79,6 @@ export default function Tasks() {
     socket.emit("updateTaskStatus", { taskId, newStatus });
   }
 
-  function handleTaskClick(taskId) {
-    setTasks((prevTasks) => {
-      // Find the clicked task
-      const taskIndex = prevTasks.findIndex((task) => task._id === taskId);
-      if (taskIndex === -1) return prevTasks;
-
-      const clickedTask = prevTasks[taskIndex];
-
-      // Filter out the clicked task and bring it to the front of its column
-      const updatedTasks = [
-        clickedTask, // Move clicked task to the top
-        ...prevTasks.filter(
-          (task) => task._id !== taskId || task.status !== clickedTask.status
-        ),
-      ];
-
-      return updatedTasks;
-    });
-
-    socket.emit("reorderTask", { taskId });
-  }
-
   const addTask = async () => {
     if (!newTask.title || !newTask.description || !newTask.status) {
       alert("Please fill in all fields.");
@@ -110,18 +86,14 @@ export default function Tasks() {
     }
 
     const newTaskData = {
-      // _id: Date.now().toString(), // Temporary ID for UI update
       title: newTask.title,
       description: newTask.description,
       status: newTask.status,
     };
 
-    // Update UI immediately
     setTasks((prevTasks) => [...prevTasks, newTaskData]);
-    // Emit event to update other clients
     socket.emit("addTask", newTaskData);
 
-    // API Call to save task in the database (you will implement this)
     try {
       await fetch("http://localhost:5000/tasks", {
         method: "POST",
@@ -135,9 +107,44 @@ export default function Tasks() {
       console.error("Error adding task:", error);
     }
 
-    // Reset form & close modal
     setNewTask({ title: "", description: "", status: "TODO" });
     setIsModalOpen(false);
+  };
+
+  const onDeleteTask = async (taskId) => {
+    try {
+      await fetch(`http://localhost:5000/tasks/${taskId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
+      socket.emit("deleteTask", taskId);
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    }
+  };
+
+  const onEditTask = async (taskId, updatedTask) => {
+    try {
+      await fetch(`http://localhost:5000/tasks/${taskId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updatedTask),
+      });
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task._id === taskId ? { ...task, ...updatedTask } : task
+        )
+      );
+      socket.emit("updateTask", { taskId, updatedTask });
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
   };
 
   return (
@@ -145,13 +152,13 @@ export default function Tasks() {
       <div className="flex justify-between items-center gap-x-5 ">
         <button
           onClick={() => setIsModalOpen(true)}
-          className="mb-4 px-4 py-2 bg-blue-500 text-white rounded flex items-center gap-2"
+          className="mb-4 px-4 py-2 bg-gray-100 text-gray-900 rounded flex items-center gap-2"
         >
           <FaPlus /> Add Task
         </button>
         <div className="flex items-center flex-col gap-2 mb-5">
           <h1 className="text-2xl font-bold ">Task Manager</h1>
-          <span className="font-bold">Hi!, {user?.displayName}</span>
+          <span className="font-bold">Hi!, {user?.displayName || "User"} </span>
         </div>
         <button
           onClick={signOut}
@@ -162,13 +169,17 @@ export default function Tasks() {
         </button>
       </div>
       <div className="flex lg:flex-row flex-col gap-8">
-        <DndContext onDragEnd={handleDragEnd}>
+        <DndContext
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
           {COLUMNS.map((column) => (
             <Column
               key={column._id}
               column={column}
               tasks={tasks.filter((task) => task.status === column._id)}
-              handleTaskClick={handleTaskClick}
+              onDeleteTask={onDeleteTask}
+              onEditTask={onEditTask}
             />
           ))}
         </DndContext>
@@ -216,7 +227,7 @@ export default function Tasks() {
               </button>
               <button
                 onClick={addTask}
-                className="px-4 py-2 bg-green-500 text-white rounded"
+                className="px-4 py-2 bg-gray-100 text-gray-900 rounded"
               >
                 Add
               </button>
