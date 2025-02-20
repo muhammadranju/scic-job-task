@@ -11,21 +11,25 @@ const router = createBrowserRouter([
     element: <Root />,
     errorElement: <>Not Found</>,
     children: [
-      {
-        path: "home",
-        element: (
-          <PrivateRoutes>
-            <Home />
-          </PrivateRoutes>
-        ),
-      },
+      // {
+      //   path: "home",
+      //   element: (
+      //     <PrivateRoutes>
+      //       <Home />
+      //     </PrivateRoutes>
+      //   ),
+      // },
       {
         path: "login",
         element: <Login />,
       },
       {
         index: true,
-        element: <Tasks />,
+        element: (
+          <PrivateRoutes>
+            <Tasks />
+          </PrivateRoutes>
+        ),
       },
     ],
   },
