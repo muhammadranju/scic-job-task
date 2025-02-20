@@ -3,6 +3,7 @@ import Root from "../layout/root";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Tasks from "../pages/Tasks";
+import PrivateRoutes from "./PrivateRoute";
 
 const router = createBrowserRouter([
   {
@@ -11,15 +12,19 @@ const router = createBrowserRouter([
     errorElement: <>Not Found</>,
     children: [
       {
-        index: true,
-        element: <Home />,
+        path: "home",
+        element: (
+          <PrivateRoutes>
+            <Home />
+          </PrivateRoutes>
+        ),
       },
       {
         path: "login",
         element: <Login />,
       },
       {
-        path: "tasks",
+        index: true,
         element: <Tasks />,
       },
     ],

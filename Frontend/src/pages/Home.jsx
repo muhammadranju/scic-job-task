@@ -69,33 +69,33 @@ const Home = () => {
   });
   console.log(newTask);
 
-  useEffect(() => {
-    const getTasks = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/tasks");
-        const data = await response.json();
-        // console.log("Fetched tasks:", data.data); // Debugging line
-        // Ensure data is correctly structured
-        if (data.data) {
-          setTasks(data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching tasks:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const getTasks = async () => {
+  //     try {
+  //       const response = await fetch("http://localhost:5000/tasks");
+  //       const data = await response.json();
+  //       // console.log("Fetched tasks:", data.data); // Debugging line
+  //       // Ensure data is correctly structured
+  //       if (data.data) {
+  //         setTasks(data.data);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching tasks:", error);
+  //     }
+  //   };
 
-    getTasks();
-    socket.emit("fetchTasks");
+  //   getTasks();
+  //   socket.emit("fetchTasks");
 
-    socket.on("tasksUpdated", (updatedTasks) => {
-      console.log("Received updated tasks:", updatedTasks); // Debugging line
-      setTasks(updatedTasks);
-    });
+  //   socket.on("tasksUpdated", (updatedTasks) => {
+  //     console.log("Received updated tasks:", updatedTasks); // Debugging line
+  //     setTasks(updatedTasks);
+  //   });
 
-    return () => {
-      socket.off("tasksUpdated");
-    };
-  }, []);
+  //   return () => {
+  //     socket.off("tasksUpdated");
+  //   };
+  // }, []);
 
   const handleDragEnd = (event) => {
     const { active, over } = event;

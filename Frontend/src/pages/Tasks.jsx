@@ -1,7 +1,11 @@
-/* eslint-disable react/prop-types */
-import { useEffect, useState } from "react";
-import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
+import { DndContext } from "@dnd-kit/core";
+import { useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import Column from "../components/Column";
+import { FaPlus } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthProvider";
+import { RiLogoutCircleRLine } from "react-icons/ri";
 
 // Connect to WebSocket server
 const socket = io("http://localhost:5000"); // Adjust URL as needed
@@ -14,11 +18,30 @@ const COLUMNS = [
 
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newTask, setNewTask] = useState({
+    title: "",
+    description: "",
+    status: "",
+  });
+  const { user, signOut } = useContext(AuthContext);
+
+  const navigate = useNavigate();
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    navigate("/login");
+  }
 
   useEffect(() => {
     const getTasks = async () => {
       try {
-        const response = await fetch("http://localhost:5000/tasks");
+        const response = await fetch("http://localhost:5000/tasks", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         const data = await response.json();
         if (data.data) {
           setTasks(data.data);
@@ -39,10 +62,11 @@ export default function Tasks() {
     return () => {
       socket.off("tasksUpdated");
     };
-  }, []);
+  }, [token, newTask]);
 
   function handleDragEnd(event) {
     const { active, over } = event;
+
     if (!over) return;
 
     const taskId = active.id;
@@ -79,63 +103,127 @@ export default function Tasks() {
     socket.emit("reorderTask", { taskId });
   }
 
+  const addTask = async () => {
+    if (!newTask.title || !newTask.description || !newTask.status) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    const newTaskData = {
+      // _id: Date.now().toString(), // Temporary ID for UI update
+      title: newTask.title,
+      description: newTask.description,
+      status: newTask.status,
+    };
+
+    // Update UI immediately
+    setTasks((prevTasks) => [...prevTasks, newTaskData]);
+    // Emit event to update other clients
+    socket.emit("addTask", newTaskData);
+
+    // API Call to save task in the database (you will implement this)
+    try {
+      await fetch("http://localhost:5000/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newTaskData),
+      });
+    } catch (error) {
+      console.error("Error adding task:", error);
+    }
+
+    // Reset form & close modal
+    setNewTask({ title: "", description: "", status: "TODO" });
+    setIsModalOpen(false);
+  };
+
   return (
-    <div className="p-4">
-      <div className="flex gap-8">
+    <div className="p-6 bg-gray-900 min-h-screen flex flex-col items-center text-white">
+      <div className="flex justify-between items-center gap-x-5 ">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="mb-4 px-4 py-2 bg-blue-500 text-white rounded flex items-center gap-2"
+        >
+          <FaPlus /> Add Task
+        </button>
+        <div className="flex items-center flex-col gap-2 mb-5">
+          <h1 className="text-2xl font-bold ">Task Manager</h1>
+          <span className="font-bold">Hi!, {user?.displayName}</span>
+        </div>
+        <button
+          onClick={signOut}
+          className="mb-4 px-4 py-2 bg-red-500 text-white rounded flex items-center gap-2"
+        >
+          <RiLogoutCircleRLine />
+          LogOut
+        </button>
+      </div>
+      <div className="flex lg:flex-row flex-col gap-8">
         <DndContext onDragEnd={handleDragEnd}>
           {COLUMNS.map((column) => (
             <Column
               key={column._id}
               column={column}
               tasks={tasks.filter((task) => task.status === column._id)}
-              onTaskClick={handleTaskClick}
+              handleTaskClick={handleTaskClick}
             />
           ))}
         </DndContext>
       </div>
-    </div>
-  );
-}
 
-function Column({ column, tasks, onTaskClick }) {
-  const { setNodeRef } = useDroppable({ id: column._id });
-
-  return (
-    <div className="flex w-80 flex-col rounded-lg bg-neutral-800 p-4">
-      <h2 className="mb-4 font-semibold text-neutral-100">{column.title}</h2>
-      <div ref={setNodeRef} className="flex flex-1 flex-col gap-4">
-        {tasks.length > 0 ? (
-          tasks.map((task) => (
-            <TaskCard key={task._id} task={task} onClick={onTaskClick} />
-          ))
-        ) : (
-          <p className="text-neutral-500 text-sm">No tasks</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function TaskCard({ task, onClick }) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: task._id,
-  });
-
-  const style = transform
-    ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
-    : undefined;
-
-  return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      onClick={() => onClick(task._id)} // Call the reorder function on click
-      className="cursor-pointer cursor-grab rounded-lg bg-neutral-700 p-4 shadow-sm hover:shadow-md transition-transform"
-      style={style}
-    >
-      <h3 className="font-medium text-neutral-100">{task.title}</h3>
-      <p className="mt-2 text-sm text-neutral-400">{task.description}</p>
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-gray-800 p-6 rounded-lg w-96">
+            <h2 className="text-lg font-bold mb-4">Add Task</h2>
+            <input
+              type="text"
+              placeholder="Title"
+              className="w-full p-2 mb-2 bg-gray-700 text-white rounded"
+              value={newTask.title}
+              onChange={(e) =>
+                setNewTask({ ...newTask, title: e.target.value })
+              }
+            />
+            <textarea
+              placeholder="Description"
+              className="w-full p-2 mb-2 bg-gray-700 text-white rounded"
+              value={newTask.description}
+              onChange={(e) =>
+                setNewTask({ ...newTask, description: e.target.value })
+              }
+            ></textarea>
+            <select
+              className="w-full p-2 mb-2 bg-gray-700 text-white rounded"
+              value={newTask.status}
+              onChange={(e) =>
+                setNewTask({ ...newTask, status: e.target.value })
+              }
+            >
+              <option defaultChecked>Status</option>
+              <option value="TODO">To-Do</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="DONE">Done</option>
+            </select>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 bg-red-500 text-white rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={addTask}
+                className="px-4 py-2 bg-green-500 text-white rounded"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

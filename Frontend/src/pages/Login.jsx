@@ -1,4 +1,77 @@
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../firebase/firebase.config";
+
 const Login = () => {
+  const [email] = useState("user@gmail.com");
+  const navigate = useNavigate();
+
+  const handelLogin = async () => {
+    const response = await fetch("http://localhost:5000/users/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await response.json();
+
+    const { token, user } = data.data;
+
+    if (status.ok) {
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      navigate("/");
+    }
+  };
+
+  const handelGoogleLogin = async () => {
+    const googleProvider = new GoogleAuthProvider();
+    try {
+      const googleUser = await signInWithPopup(auth, googleProvider);
+      const { email, displayName, uid } = googleUser.user;
+
+      console.log(googleUser);
+      if (googleUser) {
+        const userData = await fetch(
+          `${import.meta.env.VITE_BackendURL}/users/login`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: uid,
+              email: email,
+              displayName: displayName,
+            }),
+          }
+        );
+        const user = await userData.json();
+
+        console.log(user);
+
+        if (user.status === 200) {
+          localStorage.setItem("token", user.data.token);
+          localStorage.setItem("user", JSON.stringify(user.data.user));
+          navigate("/");
+        }
+
+        // Check if token already exists
+        // if (!localStorage.getItem("token")) {
+        //   localStorage.setItem("token", user?.token);
+        // }
+
+        // navigate(location.state ? location.state : "/");
+      }
+      navigate("/", { replace: true });
+    } catch (error) {
+      console.error("Google login error", error);
+      toast.error("Login Failed! Please try again.");
+    }
+  };
+
   return (
     <>
       <>
@@ -13,13 +86,19 @@ const Login = () => {
                       className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                       type="email"
                       placeholder="Email"
+                      defaultValue={"user@gmail.com"}
                     />
                     <input
                       className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5"
                       type="password"
                       placeholder="Password"
+                      defaultValue={"123456789"}
                     />
-                    <button className="mt-5 tracking-wide font-semibold bg-gray-600 text-white w-full py-4 rounded-lg hover:bg-gray-700 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none">
+                    <button
+                      type="submit"
+                      onClick={handelLogin}
+                      className="mt-5 tracking-wide font-semibold bg-gray-600 text-white w-full py-4 rounded-lg hover:bg-gray-700 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none"
+                    >
                       <svg
                         className="w-6 h-6 -ml-2"
                         fill="none"
@@ -41,7 +120,10 @@ const Login = () => {
                     </div>
                   </div>
                   <div className="flex flex-col items-center">
-                    <button className="w-full max-w-xs font-bold shadow-sm rounded-lg py-3 bg-gray-100 text-gray-800 flex items-center justify-center transition-all duration-300 ease-in-out focus:outline-none hover:shadow focus:shadow-sm focus:shadow-outline">
+                    <button
+                      onClick={handelGoogleLogin}
+                      className="w-full max-w-xs font-bold shadow-sm rounded-lg py-3 bg-gray-100 text-gray-800 flex items-center justify-center transition-all duration-300 ease-in-out focus:outline-none hover:shadow focus:shadow-sm focus:shadow-outline"
+                    >
                       <div className="bg-white p-2 rounded-full">
                         <svg className="w-4" viewBox="0 0 533.5 544.3">
                           <path
