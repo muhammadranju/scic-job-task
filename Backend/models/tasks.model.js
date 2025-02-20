@@ -1,3 +1,4 @@
+const moment = require("moment");
 const { Schema, model } = require("mongoose");
 
 const taskSchema = new Schema(
@@ -20,9 +21,9 @@ const taskSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    createdAt: {
+    date: {
       type: Date,
-      default: Date.now,
+      default: moment().format("L"),
     },
   },
   {
