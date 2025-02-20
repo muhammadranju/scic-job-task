@@ -19,7 +19,7 @@ const Login = () => {
 
     const { token, user } = data.data;
 
-    if (status.ok) {
+    if (response.ok) {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
       navigate("/");
