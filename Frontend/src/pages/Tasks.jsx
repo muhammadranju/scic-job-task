@@ -8,7 +8,7 @@ import Column from "../components/Column";
 import { AuthContext } from "../context/AuthProvider";
 import Swal from "sweetalert2";
 
-const socket = io("http://localhost:5000");
+const socket = io(import.meta.env.VITE_BackendURL);
 
 const COLUMNS = [
   { _id: "TODO", title: "To Do" },
@@ -37,11 +37,14 @@ export default function Tasks() {
   useEffect(() => {
     const getTasks = async () => {
       try {
-        const response = await fetch("http://localhost:5000/tasks", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_BackendURL}/tasks`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         const data = await response.json();
         if (data.data) {
           setTasks(data.data);
@@ -53,14 +56,14 @@ export default function Tasks() {
 
     getTasks();
 
-    socket.on("tasksUpdated", (updatedTasks) => {
-      console.log("Received updated tasks:", updatedTasks);
-      setTasks(updatedTasks);
-    });
+    // socket.on("tasksUpdated", (updatedTasks) => {
+    //   console.log("Received updated tasks:", updatedTasks);
+    //   setTasks(updatedTasks);
+    // });
 
-    return () => {
-      socket.off("tasksUpdated");
-    };
+    // return () => {
+    //   socket.off("tasksUpdated");
+    // };
   }, [token, newTask]);
 
   function handleDragEnd(event) {
@@ -77,7 +80,7 @@ export default function Tasks() {
       );
     });
 
-    socket.emit("updateTaskStatus", { taskId, newStatus });
+    // socket.emit("updateTaskStatus", { taskId, newStatus });
   }
 
   const addTask = async () => {
@@ -93,10 +96,10 @@ export default function Tasks() {
     };
 
     setTasks((prevTasks) => [...prevTasks, newTaskData]);
-    socket.emit("addTask", newTaskData);
+    // socket.emit("addTask", newTaskData);
 
     try {
-      await fetch("http://localhost:5000/tasks", {
+      await fetch(`${import.meta.env.VITE_BackendURL}/tasks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -124,7 +127,7 @@ export default function Tasks() {
         confirmButtonText: "Yes, delete it!",
       }).then(async (result) => {
         if (result.isConfirmed) {
-          await fetch(`http://localhost:5000/tasks/${taskId}`, {
+          await fetch(`${import.meta.env.VITE_BackendURL}/tasks/${taskId}`, {
             method: "DELETE",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -133,7 +136,7 @@ export default function Tasks() {
           setTasks((prevTasks) =>
             prevTasks.filter((task) => task._id !== taskId)
           );
-          socket.emit("deleteTask", taskId);
+          // socket.emit("deleteTask", taskId);
           Swal.fire({
             title: "Deleted!",
             text: "Your file has been deleted.",
@@ -148,7 +151,7 @@ export default function Tasks() {
 
   const onEditTask = async (taskId, updatedTask) => {
     try {
-      await fetch(`http://localhost:5000/tasks/${taskId}`, {
+      await fetch(`${import.meta.env.VITE_BackendURL}/tasks/${taskId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -161,7 +164,7 @@ export default function Tasks() {
           task._id === taskId ? { ...task, ...updatedTask } : task
         )
       );
-      socket.emit("updateTask", { taskId, updatedTask });
+      // socket.emit("updateTask", { taskId, updatedTask });
     } catch (error) {
       console.error("Error updating task:", error);
     }
@@ -189,22 +192,22 @@ export default function Tasks() {
         </button>
       </div>
       <div className="flex lg:flex-row flex-col gap-8">
-        <DndContext
+        {/* <DndContext
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
-        >
-          {COLUMNS.map((column) => (
-            <Column
-              key={column._id}
-              column={column}
-              tasks={tasks.filter((task) => task.status === column._id)}
-              onDeleteTask={onDeleteTask}
-              onEditTask={onEditTask}
-              setTasks={setTasks}
-              onDragEnd={handleDragEnd}
-            />
-          ))}
-        </DndContext>
+        > */}
+        {COLUMNS.map((column) => (
+          <Column
+            key={column._id}
+            column={column}
+            tasks={tasks.filter((task) => task.status === column._id)}
+            onDeleteTask={onDeleteTask}
+            onEditTask={onEditTask}
+            setTasks={setTasks}
+            onDragEnd={handleDragEnd}
+          />
+        ))}
+        {/* </DndContext> */}
       </div>
 
       {isModalOpen && (

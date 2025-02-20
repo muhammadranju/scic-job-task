@@ -12,7 +12,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
 
 // Connect to WebSocket server
-const socket = io("http://localhost:5000"); // Change this URL to your backend
+const socket = io(import.meta.env.VITE_BackendURL); // Change this URL to your backend
 
 const COLUMNS = [
   { id: "TODO", title: "To Do" },
@@ -72,7 +72,7 @@ const Home = () => {
   // useEffect(() => {
   //   const getTasks = async () => {
   //     try {
-  //       const response = await fetch("http://localhost:5000/tasks");
+  //       const response = await fetch("https://scicc-job-task.vercel.app/tasks");
   //       const data = await response.json();
   //       // console.log("Fetched tasks:", data.data); // Debugging line
   //       // Ensure data is correctly structured

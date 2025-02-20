@@ -9,11 +9,14 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handelLogin = async () => {
-    const response = await fetch("http://localhost:5000/users/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
+    const response = await fetch(
+      `${import.meta.env.VITE_BackendURL}/users/login`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      }
+    );
 
     const data = await response.json();
 
