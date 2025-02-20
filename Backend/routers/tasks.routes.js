@@ -7,8 +7,8 @@ const {
 } = require("../controllers/tasks.controller");
 const authMiddleware = require("../middleware/authMiddleware");
 
-router.get("/", getTasks);
-router.post("/", createTask);
+router.get("/", authMiddleware, getTasks);
+router.post("/", authMiddleware, createTask);
 router.put("/:id", updateTask);
 router.delete("/:id", deleteTask);
 
