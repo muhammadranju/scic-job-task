@@ -84,7 +84,7 @@ const Login = () => {
             <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
               <div className="mt-12 flex flex-col items-center">
                 <div className="w-full flex-1 mt-36">
-                  <div className="mx-auto max-w-xs">
+                  <div className="mx-auto max-w-xs hidden">
                     <input
                       className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                       type="email"
@@ -119,7 +119,7 @@ const Login = () => {
                   </div>
                   <div className="my-12 border-b text-center">
                     <div className="leading-none px-2 inline-block text-sm text-gray-600 tracking-wide font-medium bg-white transform translate-y-1/2">
-                      Or sign In with Cartesian E-mail
+                      Login with Google Account
                     </div>
                   </div>
                   <div className="flex flex-col items-center">
