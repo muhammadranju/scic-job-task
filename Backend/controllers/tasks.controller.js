@@ -83,9 +83,13 @@ const updateTask = async (req, res) => {
     // const findTask = await Task.findById({ _id: req.params.id });
     // findTask.status = req.body.status;
     // console.log(findTask);
-    const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const task = await Task.findByIdAndUpdate(
+      { _id: req.params.id },
+      req.body,
+      {
+        new: true,
+      }
+    );
     return res.json({
       status: 200,
       success: true,
