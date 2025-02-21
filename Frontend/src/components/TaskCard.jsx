@@ -9,6 +9,8 @@ function TaskCard({ task, onDeleteTask, onEditTask }) {
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
   const [editedTask, setEditedTask] = useState({
     title: task.title,
     description: task.description,
@@ -16,8 +18,11 @@ function TaskCard({ task, onDeleteTask, onEditTask }) {
   });
 
   const style = transform
-    ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
-    : undefined;
+    ? {
+        transform: `translate(${transform.x}px, ${transform.y}px)`,
+        touchAction: "none",
+      }
+    : { touchAction: "none" }; // Prevents touch scrolling interference
 
   const handleDelete = () => {
     onDeleteTask(task._id);
@@ -33,22 +38,30 @@ function TaskCard({ task, onDeleteTask, onEditTask }) {
         ref={setNodeRef}
         style={style}
         className="rounded-lg p-4 shadow-sm bg-gray-700 hover:shadow-md transition-transform flex justify-between items-center"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         {/* Draggable area (only the left side) */}
-        <div {...listeners} {...attributes} className="cursor-grab flex-1">
+        <div
+          {...listeners}
+          {...attributes}
+          className="cursor-grab flex-1 active:cursor-grabbing select-none"
+        >
           <h3 className="font-medium text-neutral-100">{task.title}</h3>
           <p className="mt-2 text-sm text-neutral-400">{task.description}</p>
         </div>
 
         {/* Buttons (Non-Draggable) */}
-        <div className="flex gap-2">
-          <button onClick={handleEdit} className="text-green-400 p-2">
-            <FaEdit className="text-2xl" />
-          </button>
-          <button onClick={handleDelete} className="text-red-400 p-2">
-            <FaTrash className="text-xl" />
-          </button>
-        </div>
+        {isHovered && (
+          <div className="flex gap-2">
+            <button onClick={handleEdit} className="text-green-400 p-2">
+              <FaEdit className="text-2xl" />
+            </button>
+            <button onClick={handleDelete} className="text-red-400 p-2">
+              <FaTrash className="text-xl" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Edit Modal */}

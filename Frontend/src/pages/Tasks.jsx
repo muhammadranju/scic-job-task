@@ -176,12 +176,18 @@ export default function Tasks() {
       <div className="flex justify-between items-center gap-x-5 ">
         <button
           onClick={() => setIsModalOpen(true)}
-          className="mb-4 px-4 py-2 bg-gray-100 text-gray-900 rounded flex items-center gap-2"
+          className="mb-4 px-4 py-2 bg-gray-100   text-gray-900 rounded lg:flex items-center hidden gap-2"
         >
           <FaPlus /> Add Task
         </button>
-        <div className="flex items-center flex-col gap-2 mb-5">
-          <h1 className="text-2xl font-bold ">Task Manager</h1>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="mb-4 px-4 py-2 bg-gray-100   text-gray-900 rounded flex items-center lg:hidden gap-2"
+        >
+          <FaPlus /> Add
+        </button>
+        <div className="lg:flex items-center flex-col gap-2 mb-5 hidden">
+          <h1 className="lg:text-2xl text-lg font-bold ">Task Manager</h1>
           <span className="font-bold">Hi!, {user?.displayName || "User"} </span>
         </div>
         <button
