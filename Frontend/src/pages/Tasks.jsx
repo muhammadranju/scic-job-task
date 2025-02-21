@@ -24,6 +24,8 @@ export default function Tasks() {
     description: "",
     status: "",
   });
+
+  const [updateStatus, setUpdateStatus] = useState(false);
   const { user, signOut } = useContext(AuthContext);
 
   const navigate = useNavigate();
@@ -64,7 +66,7 @@ export default function Tasks() {
     // return () => {
     //   socket.off("tasksUpdated");
     // };
-  }, [token, newTask]);
+  }, [token, newTask, updateStatus]);
 
   function handleDragEnd(event) {
     const { active, over } = event;
@@ -205,6 +207,7 @@ export default function Tasks() {
             onEditTask={onEditTask}
             setTasks={setTasks}
             onDragEnd={handleDragEnd}
+            setUpdateStatus={setUpdateStatus}
           />
         ))}
         {/* </DndContext> */}

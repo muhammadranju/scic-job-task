@@ -6,7 +6,13 @@ import { Reorder } from "framer-motion";
 import { useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 
-function TaskCard({ task, onDeleteTask, onEditTask, setTasks }) {
+function TaskCard({
+  task,
+  onDeleteTask,
+  onEditTask,
+  setTasks,
+  setUpdateStatus,
+}) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: task._id,
   });
@@ -16,6 +22,7 @@ function TaskCard({ task, onDeleteTask, onEditTask, setTasks }) {
     description: task.description,
     status: task.status,
   });
+  const token = localStorage.getItem("token");
 
   const [mouseIsOver, setMouseIsOver] = useState(false);
 
@@ -34,6 +41,41 @@ function TaskCard({ task, onDeleteTask, onEditTask, setTasks }) {
   const handleUpdate = () => {
     onEditTask(task._id, editedTask);
     setIsModalOpen(false);
+  };
+
+  const handelStatusUpdate = async (taskId, status) => {
+    // onEditTask(taskId, JSON.stringify({ status }));
+    // console.log(taskId);
+    // console.log(status);
+    try {
+      const getTask = await fetch(
+        `${import.meta.env.VITE_BackendURL}/tasks/${taskId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
+      if (getTask.ok) {
+        setUpdateStatus(true);
+        console.log("ok");
+      }
+      const data = await getTask.json();
+      console.log(data);
+
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task._id === taskId ? { ...task, ...status } : task
+        )
+      );
+      setUpdateStatus(false);
+      // socket.emit("updateTask", { taskId, getTask });
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
   };
 
   return (
@@ -62,6 +104,24 @@ function TaskCard({ task, onDeleteTask, onEditTask, setTasks }) {
               >
                 {task.description}
               </p>
+              {/* {console.log(task._id)} */}
+              <button
+                onClick={() =>
+                  handelStatusUpdate(
+                    task._id,
+                    task.status === "TODO" ? "IN_PROGRESS" : "DONE"
+                  )
+                }
+                className={`p-[3px] px-2 text-sm mt-2 rounded-md ${
+                  (task.status === "DONE" && "hidden") ||
+                  (task.status === "TODO" && "bg-yellow-400 text-gray-800") ||
+                  (task.status === "IN_PROGRESS" &&
+                    "bg-green-400 text-gray-900")
+                } bg-gray-100 text-gray-900`}
+              >
+                {(task.status === "TODO" && "Mark as In Progress") ||
+                  (task.status === "IN_PROGRESS" && "Mark as Done")}
+              </button>
             </div>
             {mouseIsOver && (
               <div className="flex gap-2">

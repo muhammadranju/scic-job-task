@@ -78,17 +78,23 @@ const getTaskById = async (req, res) => {
 
 const updateTask = async (req, res) => {
   try {
+    console.log(req.body);
+
+    // const findTask = await Task.findById({ _id: req.params.id });
+    // findTask.status = req.body.status;
+    // console.log(findTask);
     const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
-    res.json({
+    return res.json({
       status: 200,
       success: true,
       message: "Task updated successfully",
       data: task,
     });
   } catch (err) {
-    res.status(500).json({
+    console.log(err);
+    return res.status(500).json({
       status: 500,
       success: false,
       message: "Internal Server Error",
