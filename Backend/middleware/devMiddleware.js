@@ -5,7 +5,7 @@ const middleware = [
   express.json(),
   express.urlencoded({ extended: true }),
   cors({
-    origin: "https://task-manager-9f8db.web.app" || "http://localhost:5173",
+    origin: process.env.FRONTEND_URL,
     credentials: true,
   }),
   morgan("dev"),
