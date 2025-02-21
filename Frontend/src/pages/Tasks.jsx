@@ -3,12 +3,12 @@ import { useContext, useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { RiLogoutCircleRLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
-import { io } from "socket.io-client";
+// import { io } from "socket.io-client";
 import Column from "../components/Column";
 import { AuthContext } from "../context/AuthProvider";
 import Swal from "sweetalert2";
 
-const socket = io(import.meta.env.VITE_BackendURL);
+// const socket = io(import.meta.env.VITE_BackendURL);
 
 const COLUMNS = [
   { _id: "TODO", title: "To Do" },
@@ -56,14 +56,14 @@ export default function Tasks() {
 
     getTasks();
 
-    socket.on("tasksUpdated", (updatedTasks) => {
-      console.log("Received updated tasks:", updatedTasks);
-      setTasks(updatedTasks);
-    });
+    // socket.on("tasksUpdated", (updatedTasks) => {
+    //   console.log("Received updated tasks:", updatedTasks);
+    //   setTasks(updatedTasks);
+    // });
 
-    return () => {
-      socket.off("tasksUpdated");
-    };
+    // return () => {
+    //   socket.off("tasksUpdated");
+    // };
   }, [token, newTask]);
 
   function handleDragEnd(event) {
@@ -80,7 +80,7 @@ export default function Tasks() {
       );
     });
 
-    socket.emit("updateTaskStatus", { taskId, newStatus });
+    // socket.emit("updateTaskStatus", { taskId, newStatus });
   }
 
   const addTask = async () => {
@@ -96,7 +96,7 @@ export default function Tasks() {
     };
 
     setTasks((prevTasks) => [...prevTasks, newTaskData]);
-    socket.emit("addTask", newTaskData);
+    // socket.emit("addTask", newTaskData);
 
     try {
       await fetch(`${import.meta.env.VITE_BackendURL}/tasks`, {
@@ -136,7 +136,7 @@ export default function Tasks() {
           setTasks((prevTasks) =>
             prevTasks.filter((task) => task._id !== taskId)
           );
-          socket.emit("deleteTask", taskId);
+          // socket.emit("deleteTask", taskId);
           Swal.fire({
             title: "Deleted!",
             text: "Your file has been deleted.",
@@ -164,7 +164,7 @@ export default function Tasks() {
           task._id === taskId ? { ...task, ...updatedTask } : task
         )
       );
-      socket.emit("updateTask", { taskId, updatedTask });
+      // socket.emit("updateTask", { taskId, updatedTask });
     } catch (error) {
       console.error("Error updating task:", error);
     }
