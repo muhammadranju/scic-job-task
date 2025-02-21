@@ -6,7 +6,7 @@ The Task Management Application is a fully responsive web-based application that
 
 ## Live Demo
 
-[Live Demo](https://scicc-job-task.vercel.app/)
+[Live Demo](https://task-manager-9f8db.web.app)
 
 ## Features
 
@@ -45,7 +45,7 @@ The Task Management Application is a fully responsive web-based application that
 
 - React (Vite.js)
 - Firebase Authentication
-- Drag-and-drop library (react-beautiful-dnd or similar)
+- Drag-and-drop library dnd-kit
 - Tailwind CSS / Material UI (for styling)
 
 ### Backend
