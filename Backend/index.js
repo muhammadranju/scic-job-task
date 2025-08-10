@@ -20,11 +20,11 @@ io.on("connection", (socket) => {
   console.log("Client connected:", socket.id);
   updatedTasksStatus(socket, io);
 
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
+  // socket.on("disconnect", () => {
+  //   console.log("User disconnected:", socket.id);
+  // });
 });
 
 server.listen(5000, () =>
-  console.log("WebSocket Server running on http://your-backend.com:5000")
+  console.log("WebSocket Server running on http://localhost:5000")
 );
